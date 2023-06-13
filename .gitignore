@@ -42,6 +42,7 @@ docs/build/
 
 # Data
 **/Data/
+**/*.json
 
 # Dev
 sandbox/*

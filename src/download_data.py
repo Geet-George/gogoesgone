@@ -23,15 +23,15 @@ import datetime as dt  ## More information about the datetime library acesse thi
 
 ### Getting the current date (in UTC coordinate)
 ## All these variables need be string
-utcDateTime = dt.datetime.utcnow()
-## current year
-year = utcDateTime.strftime("%Y")
-# current month
-month = utcDateTime.strftime("%m")
-## current day
-day = utcDateTime.strftime("%d")
-## current hour in UTC
-hour = utcDateTime.strftime("%H")
+# utcDateTime = dt.datetime.utcnow()
+# ## current year
+# year = utcDateTime.strftime("%Y")
+# # current month
+# month = utcDateTime.strftime("%m")
+# ## current day
+# day = utcDateTime.strftime("%d")
+# ## current hour in UTC
+# hour = utcDateTime.strftime("%H")
 ##Choose a channel from your preference (can be C01-C16)
 channel = [
     "C01",
@@ -46,14 +46,20 @@ channel = [
 ## 3 are L2-MCMIP(M,C,F)
 ### In your case we will get the CMIPF, F means FullDisk (all the projection by the satellite)
 product = [
-    "ABI-L1b-RadF",
+    "ABI-L2-CMIPF",
 ]
 
 ## The Bucket is the variable contains the name of dataset server from goes on AWS
 Bucket = "noaa-goes16"  ## in the future on AWS they will have goes17.
 ## Now we will call the function ABI_Downloader:
+year = 2021
+month = 7
 
-Abi = ABI_Downloader("Data/", "noaa-goes16", year, month, day, hour, product, channel)
+for day in range(1, 32):
+    for hour in range(24):
+        Abi = ABI_Downloader(
+            "Data/", "noaa-goes16", year, month, day, hour, product, channel
+        )
 
 ##After all the dataset is downloaded, they are in your home directory with that structure:
 """goes16

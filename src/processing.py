@@ -2,15 +2,34 @@ import os
 
 import numpy as np
 import xarray as xr
+import fsspec
 
 
 class Image:
     """Class to read and process images"""
 
     def __init__(self, filepath):
-        self.filepath = filepath
-        self.filename = os.path.basename(filepath)
-        self.dataset = xr.open_dataset(self.filepath)
+        if type(filepath) == str:
+            self.filepath = filepath
+            self.filename = os.path.basename(filepath)
+            self.dataset = xr.open_dataset(self.filepath)
+        elif type(filepath) == list:
+            self.dataset = xr.open_mfdataset(
+                filepath,
+                combine="nested",
+                concat_dim="t",
+                engine="zarr",
+                coords="minimal",
+                data_vars="minimal",
+                compat="override",
+            )
+        elif type(filepath) == fsspec.mapping.FSMap:
+            self.dataset = xr.open_dataset(filepath, engine="zarr")
+        else:
+            print(
+                "Provided 'filepath' argument was not any of string (single file), list (mfdataset) or FSMap. Therefore, instance created without data and attributes."
+            )
+
         self.r_eq = self.dataset["goes_imager_projection"].attrs["semi_major_axis"]
         self.inv_f = self.dataset["goes_imager_projection"].attrs["inverse_flattening"]
         self.r_pol = self.dataset["goes_imager_projection"].attrs["semi_minor_axis"]
