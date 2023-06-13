@@ -6,10 +6,6 @@ from dask.distributed import Client
 
 import fsspec
 
-# import ujson
-# from tqdm import tqdm
-# from glob import glob
-
 
 def generate_globsearch_string(
     year, dayofyear, hour=None, channel=13, product="ABI-L2-CMIPF", satellite="goes16"
@@ -95,8 +91,7 @@ def get_mzz_from_references(flist, save=False, save_file="./combined.json"):
     if isinstance(flist, str):
         flist = [flist]
     elif isinstance(flist, list):
-        client = Client(n_workers=8)
-        client
+        pass
     else:
         return print("Please pass flist as either list or string")
 
