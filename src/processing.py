@@ -125,15 +125,86 @@ class Image:
     def subset_region_from_latlon_extents(self, extents, unit="degree"):
         w_extent, e_extent, s_extent, n_extent = extents
 
-        try:
-            ne_y, ne_x = self.latlon_to_xy(n_extent, e_extent, unit=unit)
-            nw_y, nw_x = self.latlon_to_xy(n_extent, w_extent, unit=unit)
-            se_y, se_x = self.latlon_to_xy(s_extent, e_extent, unit=unit)
-            sw_y, sw_x = self.latlon_to_xy(s_extent, w_extent, unit=unit)
+        ds = self.add_latlon_coordinates()
+        return ds.where(
+            (ds.lat >= s_extent)
+            & (ds.lat <= n_extent)
+            & (ds.lon >= w_extent)
+            & (ds.lon <= e_extent),
+            drop=True,
+        )
 
-            return self.dataset.sel(y=slice(ne_y, sw_y)).sel(x=slice(sw_x, ne_x))
+        # try:
+        #     ne_y, ne_x = self.latlon_to_xy(n_extent, e_extent, unit=unit)
+        #     nw_y, nw_x = self.latlon_to_xy(n_extent, w_extent, unit=unit)
+        #     se_y, se_x = self.latlon_to_xy(s_extent, e_extent, unit=unit)
+        #     sw_y, sw_x = self.latlon_to_xy(s_extent, w_extent, unit=unit)
 
-        except:
-            return print(
-                "Some exception encountered. Check if all extents provided are within satellite's visibility."
-            )
+        #     return self.dataset.sel(y=slice(ne_y, sw_y)).sel(x=slice(sw_x, ne_x))
+
+        # except:
+        #     return print(
+        #         "Some exception encountered. Check if all extents provided are within satellite's visibility."
+        #     )
+
+    def add_latlon_coordinates(self):
+        """Add lat-lon coordinates to the dataset
+
+        Returns
+        -------
+        xr.Dataset
+            Dataset with lat-lon coordinates added
+        """
+        ds = self.dataset
+
+        x = ds.x
+        y = ds.y
+
+        x, y = np.meshgrid(x, y)
+
+        r_eq = self.r_eq
+        r_pol = self.r_pol
+        l_0 = self.lambda_0
+        H = self.H
+
+        a = np.sin(x) ** 2 + (
+            np.cos(x) ** 2
+            * (np.cos(y) ** 2 + (r_eq**2 / r_pol**2) * np.sin(y) ** 2)
+        )
+        b = -2 * H * np.cos(x) * np.cos(y)
+        c = H**2 - r_eq**2
+
+        r_s = (-b - np.sqrt(b**2 - (4 * a * c))) / (2 * a)
+
+        s_x = r_s * np.cos(x) * np.cos(y)
+        s_y = -r_s * np.sin(x)
+        s_z = r_s * np.cos(x) * np.sin(y)
+
+        lat = np.arctan(
+            (r_eq**2 / r_pol**2) * (s_z / np.sqrt((H - s_x) ** 2 + s_y**2))
+        ) * (180 / np.pi)
+        lon = (l_0 - np.arctan(s_y / (H - s_x))) * (180 / np.pi)
+
+        ds = ds.assign_coords({"lat": (["y", "x"], lat), "lon": (["y", "x"], lon)})
+        ds.lat.attrs["units"] = "degrees_north"
+        ds.lon.attrs["units"] = "degrees_east"
+        return ds
+
+    def get_xy_from_latlon(self, lats, lons):
+        ds = calc_latlon(self.dataset)
+
+        lat1, lat2 = lats
+        lon1, lon2 = lons
+
+        lat = ds.lat.data
+        lon = ds.lon.data
+
+        x = ds.x.data
+        y = ds.y.data
+
+        x, y = np.meshgrid(x, y)
+
+        x = x[(lat >= lat1) & (lat <= lat2) & (lon >= lon1) & (lon <= lon2)]
+        y = y[(lat >= lat1) & (lat <= lat2) & (lon >= lon1) & (lon <= lon2)]
+
+        return ((min(x), max(x)), (min(y), max(y)))
