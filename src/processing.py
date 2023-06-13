@@ -1,3 +1,4 @@
+import numbers
 import os
 
 import numpy as np
@@ -208,3 +209,33 @@ class Image:
         y = y[(lat >= lat1) & (lat <= lat2) & (lon >= lon1) & (lon <= lon2)]
 
         return ((min(x), max(x)), (min(y), max(y)))
+
+    def get_cloud_mask(self, bt_threshold, ds=None, bt_var="CMI"):
+        """Get same-size dataset with data only for cloudy pixels
+
+        Non-nan values provided in the returned dataset are only
+
+        Parameters
+        ----------
+        bt_threshold : tuple or numeric
+            Thresholds to estimate cloud masks. If a tuple of two values are provided, cloud mask is provided between the two values (inclusive). If only one value (numeric) is provided, cloud mask is returned where values are lower than the provided threshold. Tuple with length other than 2 will return an error
+
+        Return
+        ---------
+        cloud_mask : xr.DataArray
+        """
+
+        if ds is None:
+            ds = self.dataset
+
+        if isinstance(bt_threshold, numbers.Number):
+            return ds.where(ds[bt_var] <= bt_threshold)
+        elif type(bt_threshold) == list or type(bt_threshold) == tuple:
+            if len(bt_threshold) == 2:
+                return ds.where(
+                    (ds[bt_var] <= bt_threshold[0]) & (ds[bt_var] >= bt_threshold[1])
+                )
+            else:
+                print("Please provide list or tuple of length 2.")
+        else:
+            print("Please check input types")
