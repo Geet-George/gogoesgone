@@ -1,4 +1,4 @@
-name: /Users/geet/Documents/Repositories/Owned/goesdata/goesdata_env
+name: /Users/geet/Documents/Repositories/Owned/gogoesgone/gogoesgone_env
 channels:
   - conda-forge
   - defaults
@@ -20,7 +20,7 @@ dependencies:
   - s3fs
   - h5py
   - dask
-  - multiprocess
-  - datashader
-  - geoviews
+  - pip
+  - pip:
+        - -e .
 prefix: /Users/geet/Documents/Repositories/Owned/goesdata/goesdata_env
