@@ -1,11 +1,12 @@
 from kerchunk.hdf import SingleHdf5ToZarr
 from kerchunk.combine import MultiZarrToZarr
-
+import datetime
 import dask
+import dask.bag as db
 from dask.distributed import Client
-
+import multiprocessing
 import fsspec
-
+import numpy as np
 
 def generate_globsearch_string(
     year, dayofyear, hour=None, channel=13, product="ABI-L2-CMIPF", satellite="goes16"
@@ -42,7 +43,6 @@ def nearest_time_url(time, format="%Y%m%d %H:%M:%S"):
     Searched times are in UTC, provided should also be UTC
     Function doesn't know timezones
     """
-    import datetime
 
     dt_given = datetime.datetime.strptime(time, format)
     pre_dt_given = dt_given - datetime.timedelta(hours=1)
@@ -86,7 +86,6 @@ def get_mzz_from_references(flist, save=False, save_file="./combined.json"):
     flist : List of references (list of paths to JSON)
         JSON paths option is yet to be tested
     """
-    import dask.bag as db
 
     if isinstance(flist, str):
         flist = [flist]
@@ -95,7 +94,7 @@ def get_mzz_from_references(flist, save=False, save_file="./combined.json"):
     else:
         return print("Please pass flist as either list or string")
 
-    bag = db.from_sequence(flist, npartitions=len(flist)).map(generate_references)
+    bag = db.from_sequence(flist, npartitions=64).map(generate_references)
 
     dicts = bag.compute()
     mzz = MultiZarrToZarr(
