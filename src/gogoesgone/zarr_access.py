@@ -15,6 +15,7 @@ def generate_globsearch_string(
 
     if hour is not provided, it will download for all files in the given day
     """
+    
     if hour is None:
         return f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/*/*C{str(channel).zfill(2)}*.nc"
     else:
@@ -35,7 +36,7 @@ def generate_url_list(globsearch_string):
         return flist
 
 
-def nearest_time_url(time, format="%Y%m%d %H:%M:%S"):
+def nearest_time_url(time, format="%Y%m%d %H:%M:%S", channel=13, product="ABI-L2-CMIPF", satellite="goes16"):
     """Returns URL of file with nearest observation starting time to provided time
 
     Accuracy only to the nearest second
@@ -50,7 +51,7 @@ def nearest_time_url(time, format="%Y%m%d %H:%M:%S"):
 
     url_list_hours = [
         generate_url_list(
-            generate_globsearch_string(i.year, i.timetuple().tm_yday, i.hour)
+            generate_globsearch_string(i.year, i.timetuple().tm_yday, i.hour, channel, product, satellite)
         )
         for i in [pre_dt_given, dt_given, post_dt_given]
     ]
@@ -71,6 +72,57 @@ def nearest_time_url(time, format="%Y%m%d %H:%M:%S"):
     return flist[
         [i for i, x in enumerate([nearest_time_string in i for i in flist]) if x][0]
     ]
+
+
+def get_days_between_dates(start_date, end_date):
+    
+    '''
+    Get a list of days of the year between two dates.
+    '''
+    
+    date_list = []
+    current_date = start_date
+
+    while current_date <= end_date:
+        day_of_year = current_date.timetuple().tm_yday
+        date_list.append((current_date, day_of_year))
+        current_date += datetime.timedelta(days=1)
+
+    return date_list
+
+
+def periods_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", channel=13, product="ABI-L2-CMIPF", satellite="goes16", all_hours=True):
+    
+    '''
+    Returns a list of URLs for the images contained in the specified time period.
+    '''
+    
+    start = datetime.datetime.strptime(time_period[0], format)  
+    end = datetime.datetime.strptime(time_period[1], format)
+    
+    if all_hours == True:
+        hour = None
+    
+    print(f'Collecting urls from {start} to {end}')
+    
+    # Handle year transition
+    if start.year != end.year:
+        start_of_next_year = datetime(start.year + 1, 1, 1) - datetime.timedelta(days=1)
+
+        days_list = get_days_between_dates(start, start_of_next_year)
+        days_list += get_days_between_dates(datetime(end.year, 1, 1), end)
+    else:
+        days_list = get_days_between_dates(start, end)        
+    
+    # Get url in glob format for the period     
+    flist = []
+    for date, day_number in days_list:
+        print(date.year, day_number, channel, product, satellite)
+        
+        gs = generate_globsearch_string(date.year, day_number, hour, channel, product, satellite)
+        flist = generate_url_list(gs)
+        
+    return(flist)
 
 
 def generate_references(f):
