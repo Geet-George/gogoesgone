@@ -107,10 +107,10 @@ def periods_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", c
     
     # Handle year transition
     if start.year != end.year:
-        start_of_next_year = datetime(start.year + 1, 1, 1) - datetime.timedelta(days=1)
+        start_of_next_year = datetime.datetime(start.year + 1, 1, 1) - datetime.timedelta(days=1)
 
         days_list = get_days_between_dates(start, start_of_next_year)
-        days_list += get_days_between_dates(datetime(end.year, 1, 1), end)
+        days_list += get_days_between_dates(datetime.datetime(end.year, 1, 1), end)
     else:
         days_list = get_days_between_dates(start, end)        
     
