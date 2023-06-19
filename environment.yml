@@ -21,6 +21,7 @@ dependencies:
   - h5py
   - dask
   - pip
+  - pre-commit
   - pip:
         - -e .
 prefix: /Users/geet/Documents/Repositories/Owned/goesdata/goesdata_env
