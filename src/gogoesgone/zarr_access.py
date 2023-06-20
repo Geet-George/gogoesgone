@@ -8,7 +8,6 @@ import multiprocessing
 import fsspec
 import numpy as np
 
-
 def generate_globsearch_string(
     year, dayofyear, hour=None, channel=13, product="ABI-L2-CMIPF", satellite="goes16"
 ):
@@ -91,37 +90,6 @@ def get_days_between_dates(start_date, end_date):
 
     return date_list
 
-
-def periods_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", channel=13, product="ABI-L2-CMIPF", satellite="goes16", all_hours=True):
-    
-    '''
-    Returns a list of URLs for the images contained in the specified time period.
-    '''
-    
-    start = datetime.datetime.strptime(time_period[0], format)  
-    end = datetime.datetime.strptime(time_period[1], format)
-    
-    if all_hours == True:
-        hour = None
-    
-    print(f'Collecting urls from {start} to {end}')
-    
-    # Handle year transition
-    if start.year != end.year:
-        start_of_next_year = datetime.datetime(start.year + 1, 1, 1) - datetime.timedelta(days=1)
-
-        days_list = get_days_between_dates(start, start_of_next_year)
-        days_list += get_days_between_dates(datetime.datetime(end.year, 1, 1), end)
-    else:
-        days_list = get_days_between_dates(start, end)        
-    
-    # Get url in glob format for the period     
-    flist = []
-    for date, day_number in days_list:        
-        gs = generate_globsearch_string(date.year, day_number, hour, channel, product, satellite)
-        flist.append(generate_url_list(gs))
-        
-    return(flist)
 
 def periods_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", channel=13, 
                 product="ABI-L2-CMIPF", satellite="goes16", hour_range=None):
