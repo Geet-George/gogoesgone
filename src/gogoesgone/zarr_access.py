@@ -8,6 +8,7 @@ import multiprocessing
 import fsspec
 import numpy as np
 
+
 def generate_globsearch_string(
     year, dayofyear, hour=None, channel=13, product="ABI-L2-CMIPF", satellite="goes16"
 ):
