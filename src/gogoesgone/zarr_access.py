@@ -91,7 +91,7 @@ def get_days_between_dates(start_date, end_date):
     return date_list
 
 
-def periods_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", channel=13, 
+def period_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", channel=13, 
                 product="ABI-L2-CMIPF", satellite="goes16", hour_range=None):
     
     '''
