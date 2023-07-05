@@ -7,8 +7,6 @@ name = "gogoesgone"
 dynamic = ["version"]
 requires-python = ">=3.10"
 authors = [{name = "Geet George", email = "geet.george@mpimet.mpg.de"}]
-
-[project]
 dependencies = [
   "fsspec",
   "kerchunk",
