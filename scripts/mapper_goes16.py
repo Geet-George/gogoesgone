@@ -12,7 +12,7 @@ from src.gogoesgone import processing as pr
 from src.gogoesgone import zarr_access as za
 
 # Satellite specifications
-channel = 2
+channel = 13
 satellite = "goes16"
 product="ABI-L2-CMIPF"
 savepath = f"/scratch/m/m300931/mappers/GOES-16/channel_{channel}/"
@@ -51,7 +51,7 @@ def main():
     elif channel == 13:
         hour = None # None for all hours
         gs = za.generate_globsearch_string(year, day_of_year, hour, channel, product, satellite)
-        flist.append(za.generate_url_list(gs))
+        flist = za.generate_url_list(gs)
 
     if flist == None:
         return
