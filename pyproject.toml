@@ -7,6 +7,15 @@ name = "gogoesgone"
 dynamic = ["version"]
 requires-python = ">=3.10"
 authors = [{name = "Geet George", email = "geet.george@mpimet.mpg.de"}]
+dependencies = [
+  "fsspec",
+  "kerchunk",
+  "h5py",
+  "dask",
+  "s3fs",
+  "xarray",
+  "numpy"
+]
 
 [tool.pytest.ini_options]
 addopts = [
