@@ -41,7 +41,7 @@ def main():
 
     if channel == 2:
         # get only daylight hours
-        hour_range = [11,21] # in UTC time
+        hour_range = [10,22] # in UTC time
         flist = []
         for hour in range(hour_range[0], hour_range[-1]):
             gs = za.generate_globsearch_string(year, day_of_year, hour, channel, product, satellite)
@@ -59,9 +59,9 @@ def main():
     print(f"Mapping...")
     za.get_mzz_from_references(flist, save=True, save_file=filename + ".partial")
     os.rename(filename + ".partial", filename)
-    print('Mapping done!')
-    print((time.time() - starttime)/60, 'min')
-    print("memory usage:", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    print(f'Mapping done for {args.date}!')
+    print("time:", round((time.time() - starttime)/60), 'min')
+    print("memory usage:", resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, "kB")
     
 if __name__ == "__main__":
     main()
