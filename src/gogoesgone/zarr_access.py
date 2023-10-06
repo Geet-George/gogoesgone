@@ -74,64 +74,6 @@ def nearest_time_url(time, format="%Y%m%d %H:%M:%S", channel=13, product="ABI-L2
     ]
 
 
-def get_days_between_dates(start_date, end_date):
-    
-    '''
-    Get a list of days of the year between two dates.
-    '''
-    
-    date_list = []
-    current_date = start_date
-
-    while current_date <= end_date:
-        day_of_year = current_date.timetuple().tm_yday
-        date_list.append((current_date, day_of_year))
-        current_date += datetime.timedelta(days=1)
-
-    return date_list
-
-
-def period_url(time_period, extent=(-62,-48,10,20), format="%Y%m%d %H:%M:%S", channel=13, 
-                product="ABI-L2-CMIPF", satellite="goes16", hour_range=None):
-    
-    '''
-    Returns a list of URLs for the images contained in the specified time period. Hour range is by default None, 
-    but can be set as a range, for example [10,21] for daylight hours in Barbados.
-    '''
-    
-    start = datetime.datetime.strptime(time_period[0], format)  
-    end = datetime.datetime.strptime(time_period[1], format)
-    
-    print(f'Collecting urls from {start} to {end}')
-    
-    # Handle year transition
-    if start.year != end.year:
-        start_of_next_year = datetime.datetime(start.year + 1, 1, 1) - datetime.timedelta(days=1)
-
-        days_list = get_days_between_dates(start, start_of_next_year)
-        days_list += get_days_between_dates(datetime.datetime(end.year, 1, 1), end)
-    else:
-        days_list = get_days_between_dates(start, end)        
-    
-    # Get url in glob format for the period     
-    flist = []
-    for date, day_number in days_list:
-        
-        # get files for the desired hours of the day instead of the entire day
-        if hour_range != None:
-            daylight_hours = np.arange(hour_range[0], hour_range[1])
-            for hour in daylight_hours:
-                gs = generate_globsearch_string(date.year, day_number, hour, channel, product, satellite)
-                flist.append(generate_url_list(gs))
-        
-        else:
-            hour = None
-            gs = generate_globsearch_string(date.year, day_number, hour, channel, product, satellite)
-            flist.append(generate_url_list(gs))
-    
-    return(flist)
-
-
 def generate_references(f):
     with fsspec.open(f, mode="rb", anon=True) as infile:
         return SingleHdf5ToZarr(infile, f, inline_threshold=300).translate()
