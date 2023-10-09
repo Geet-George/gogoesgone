@@ -8,7 +8,6 @@ import multiprocessing
 import fsspec
 import numpy as np
 
-
 def generate_globsearch_string(
     year, dayofyear, hour=None, channel=13, product="ABI-L2-CMIPF", satellite="goes16"
 ):
@@ -16,6 +15,7 @@ def generate_globsearch_string(
 
     if hour is not provided, it will download for all files in the given day
     """
+    
     if hour is None:
         return f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/*/*C{str(channel).zfill(2)}*.nc"
     else:
