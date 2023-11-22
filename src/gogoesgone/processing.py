@@ -4,10 +4,31 @@ import os
 import numpy as np
 import xarray as xr
 import fsspec
-
+import pickle
 
 class Image:
     """Class to read and process images"""
+    _lookup_path = os.path.join(os.path.dirname(__file__),"lookup_table.pkl")
+    
+    @classmethod
+    def load_lookup_table(cls):
+        if os.path.exists(cls._lookup_path):
+            with open(cls._lookup_path, 'rb') as f:
+                cls._lookup_table = pickle.load(f)
+        else:
+            cls._lookup_table = {}
+
+    @classmethod
+    def save_lookup_table(cls):
+        if os.path.exists(cls._lookup_path):
+            with open(cls._lookup_path, 'rb') as f:
+                existing_lookup_table = pickle.load(f)
+            if existing_lookup_table != cls._lookup_table:
+                with open(cls._lookup_path, 'wb') as f:
+                    pickle.dump(cls._lookup_table, f)
+        else:
+            with open(cls._lookup_path, 'wb') as f:
+                pickle.dump(cls._lookup_table, f)
 
     def __init__(self, filepath):
         if type(filepath) == str:
