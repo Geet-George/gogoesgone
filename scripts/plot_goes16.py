@@ -29,6 +29,8 @@ def main():
     args = parser.parse_args()
     
     print(f"Plotting satellite images for {args.date}")
+    
+    ################### USER specifies satellite and path parameters ###################
 
     channel = 13
     product = "ABI-L2-CMIPF"
@@ -43,17 +45,19 @@ def main():
         cmin = 0
         cmax = 0.2
         use_cmap = "Greys_r"
-        save_path = "/scratch/m/m300931/data/GOES-16/snapshots/channel_2/"
+        save_path = "/work/mh0010/m300931/GOES-16/snapshots/channel_2/"
 
     elif channel == 13:
         cmin = 280
         cmax = 297
         use_cmap = "Greys"
-        save_path = "/scratch/m/m300931/data/GOES-16/snapshots/channel_13/"
+        save_path = "/work/mh0010/m300931/GOES-16/snapshots/channel_13/"
         
     # Load subset data to plot
-    subset_filepath = f"/scratch/m/m300931/data/GOES-16/CMI/channel_{channel}/thesis/CMI_subset_{args.date}_{satellite}_{product}_{channel}.nc"
+    subset_filepath = f"/work/mh0010/m300931/GOES-16/subsets/channel_{channel}/CMI_subset_{args.date}_{satellite}_{product}_{channel}.nc"
     subset = xr.open_dataset(subset_filepath)
+    
+    ################### USER specifies satellite and path parameters ###################
 
     for i, t in enumerate(subset.t):
         

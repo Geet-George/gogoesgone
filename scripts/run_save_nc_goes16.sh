@@ -14,7 +14,7 @@ date_file="$1"
 
 # Get the number of CPU cores
 #NUM_CORES=$(nproc)
-NUM_CORES=4
+NUM_CORES=16
 
 # Use xargs to run the Python script in parallel for each argument from the input file
 cat "$date_file" | xargs -n 1 -P "$NUM_CORES" python -u save_nc_goes16.py > log/save_nc_goes16.txt

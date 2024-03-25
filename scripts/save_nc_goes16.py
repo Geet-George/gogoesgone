@@ -19,15 +19,20 @@ def main():
     args = parser.parse_args()
     print(args.date)
     
+    ################### USER specifies satellite and path parameters ###################
+    
      # Satellite specifications
     channel = 13
     satellite = "goes16"
     product="ABI-L2-CMIPF"
     
-    mapper_path = f"/scratch/m/m300931/mappers/GOES-16/channel_{channel}/"
+    mapper_path = f"/work/mh0010/m300931/GOES-16/mappers/channel_{channel}/"
     mapper_file = f"{args.date}_{satellite}_{product}_{channel}.json"
-    save_path = f"/scratch/m/m300931/data/GOES-16/CMI/channel_{channel}/thesis/"
+    # save_path = f"/scratch/m/m300931/data/GOES-16/CMI/channel_{channel}/thesis/"
+    save_path = f"/work/mh0010/m300931/GOES-16/subsets/channel_{channel}/"
     filename = f"CMI_subset_{args.date}_{satellite}_{product}_{channel}.nc"
+    
+    ################### USER specifies satellite and path parameters ###################
     
     print(os.path.isfile(mapper_path+mapper_file))
     
