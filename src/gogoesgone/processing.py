@@ -47,6 +47,8 @@ class Image:
             )
         elif type(filepath) == fsspec.mapping.FSMap:
             self.dataset = xr.open_dataset(filepath, engine="zarr")
+        elif type(filepath) == xr.Dataset or type(filepath) == xr.DataArray:
+            self.dataset = filepath
         else:
             print(
                 "Provided 'filepath' argument was not any of string (single file), list (mfdataset) or FSMap. Therefore, instance created without data and attributes."
