@@ -6,14 +6,16 @@ import xarray as xr
 import fsspec
 import pickle
 
+
 class Image:
     """Class to read and process images"""
-    _lookup_path = os.path.join(os.path.dirname(__file__),"lookup_table.pkl")
-    
+
+    _lookup_path = os.path.join(os.path.dirname(__file__), "lookup_table.pkl")
+
     @classmethod
     def load_lookup_table(cls):
         if os.path.exists(cls._lookup_path):
-            with open(cls._lookup_path, 'rb') as f:
+            with open(cls._lookup_path, "rb") as f:
                 cls._lookup_table = pickle.load(f)
         else:
             cls._lookup_table = {}
@@ -21,13 +23,13 @@ class Image:
     @classmethod
     def save_lookup_table(cls):
         if os.path.exists(cls._lookup_path):
-            with open(cls._lookup_path, 'rb') as f:
+            with open(cls._lookup_path, "rb") as f:
                 existing_lookup_table = pickle.load(f)
             if existing_lookup_table != cls._lookup_table:
-                with open(cls._lookup_path, 'wb') as f:
+                with open(cls._lookup_path, "wb") as f:
                     pickle.dump(cls._lookup_table, f)
         else:
-            with open(cls._lookup_path, 'wb') as f:
+            with open(cls._lookup_path, "wb") as f:
                 pickle.dump(cls._lookup_table, f)
 
     def __init__(self, filepath):
@@ -69,9 +71,7 @@ class Image:
         )
 
     def geocentric_latitude(self, geodetic_latitude):
-        return np.arctan(
-            ((self.r_pol**2) / (self.r_eq**2)) * np.tan(geodetic_latitude)
-        )
+        return np.arctan(((self.r_pol**2) / (self.r_eq**2)) * np.tan(geodetic_latitude))
 
     def geocentric_distance_to_point_on_ellipsoid(self, geocentric_latitude):
         return self.r_pol / (
@@ -158,19 +158,6 @@ class Image:
             drop=True,
         )
 
-        # try:
-        #     ne_y, ne_x = self.latlon_to_xy(n_extent, e_extent, unit=unit)
-        #     nw_y, nw_x = self.latlon_to_xy(n_extent, w_extent, unit=unit)
-        #     se_y, se_x = self.latlon_to_xy(s_extent, e_extent, unit=unit)
-        #     sw_y, sw_x = self.latlon_to_xy(s_extent, w_extent, unit=unit)
-
-        #     return self.dataset.sel(y=slice(ne_y, sw_y)).sel(x=slice(sw_x, ne_x))
-
-        # except:
-        #     return print(
-        #         "Some exception encountered. Check if all extents provided are within satellite's visibility."
-        #     )
-
     def add_latlon_coordinates(self):
         """Add lat-lon coordinates to the dataset
 
@@ -185,7 +172,9 @@ class Image:
 
         if key in Image._lookup_table:
             lat, lon = Image._lookup_table[key]
-            ds = self.dataset.assign_coords({"lat": (["y", "x"], lat), "lon": (["y", "x"], lon)})
+            ds = self.dataset.assign_coords(
+                {"lat": (["y", "x"], lat), "lon": (["y", "x"], lon)}
+            )
             ds.lat.attrs["units"] = "degrees_north"
             ds.lon.attrs["units"] = "degrees_east"
             return ds
@@ -202,8 +191,7 @@ class Image:
         H = self.H
 
         a = np.sin(x) ** 2 + (
-            np.cos(x) ** 2
-            * (np.cos(y) ** 2 + (r_eq**2 / r_pol**2) * np.sin(y) ** 2)
+            np.cos(x) ** 2 * (np.cos(y) ** 2 + (r_eq**2 / r_pol**2) * np.sin(y) ** 2)
         )
         b = -2 * H * np.cos(x) * np.cos(y)
         c = H**2 - r_eq**2
