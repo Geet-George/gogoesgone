@@ -10,16 +10,19 @@ import numpy as np
 
 
 def generate_globsearch_string(
-    year, dayofyear, hour=None, channel=13, product="ABI-L2-CMIPF", satellite="goes16"
+    year, dayofyear, hour=None, channel=None, product="ABI-L2-CMIPF", satellite="goes16"
 ):
     """returns string for glob search in AWS
 
-    if hour is not provided, it will download for all files in the given day
+    if hour is not provided, it will generate search string for all files in the given day
+    if channel is not provided, it will generate search string for all channels
     """
-    if hour is None:
-        return f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/*/*C{str(channel).zfill(2)}*.nc"
-    else:
-        return f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/{str(hour).zfill(2)}/*C{str(channel).zfill(2)}*.nc"
+    channel_string = f"*C{str(channel).zfill(2)}" if channel else ""
+    hour_string = f"{str(hour).zfill(2)}/" if hour else "*"
+    print(
+        f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/{hour_string}/{channel_string}*.nc"
+    )
+    return f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/{hour_string}/{channel_string}*.nc"
 
 
 def generate_url_list(globsearch_string):
