@@ -18,7 +18,7 @@ def generate_globsearch_string(
     if channel is not provided, it will generate search string for all channels
     """
     channel_string = f"*C{str(channel).zfill(2)}" if channel else ""
-    hour_string = f"{str(hour).zfill(2)}/" if hour else "*"
+    hour_string = f"{str(hour).zfill(2)}" if hour else "*"
     print(
         f"s3://noaa-{satellite}/{product}/{year}/{str(dayofyear).zfill(3)}/{hour_string}/{channel_string}*.nc"
     )
