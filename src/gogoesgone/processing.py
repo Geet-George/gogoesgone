@@ -4,10 +4,31 @@ import os
 import numpy as np
 import xarray as xr
 import fsspec
-
+import pickle
 
 class Image:
     """Class to read and process images"""
+    _lookup_path = os.path.join(os.path.dirname(__file__),"lookup_table.pkl")
+    
+    @classmethod
+    def load_lookup_table(cls):
+        if os.path.exists(cls._lookup_path):
+            with open(cls._lookup_path, 'rb') as f:
+                cls._lookup_table = pickle.load(f)
+        else:
+            cls._lookup_table = {}
+
+    @classmethod
+    def save_lookup_table(cls):
+        if os.path.exists(cls._lookup_path):
+            with open(cls._lookup_path, 'rb') as f:
+                existing_lookup_table = pickle.load(f)
+            if existing_lookup_table != cls._lookup_table:
+                with open(cls._lookup_path, 'wb') as f:
+                    pickle.dump(cls._lookup_table, f)
+        else:
+            with open(cls._lookup_path, 'wb') as f:
+                pickle.dump(cls._lookup_table, f)
 
     def __init__(self, filepath):
         if type(filepath) == str:
@@ -26,6 +47,8 @@ class Image:
             )
         elif type(filepath) == fsspec.mapping.FSMap:
             self.dataset = xr.open_dataset(filepath, engine="zarr")
+        elif type(filepath) == xr.Dataset or type(filepath) == xr.DataArray:
+            self.dataset = filepath
         else:
             print(
                 "Provided 'filepath' argument was not any of string (single file), list (mfdataset) or FSMap. Therefore, instance created without data and attributes."
@@ -156,13 +179,23 @@ class Image:
         xr.Dataset
             Dataset with lat-lon coordinates added
         """
+        Image.load_lookup_table()
+
+        key = (self.r_eq, self.r_pol, self.lambda_0, self.H)
+
+        if key in Image._lookup_table:
+            lat, lon = Image._lookup_table[key]
+            ds = self.dataset.assign_coords({"lat": (["y", "x"], lat), "lon": (["y", "x"], lon)})
+            ds.lat.attrs["units"] = "degrees_north"
+            ds.lon.attrs["units"] = "degrees_east"
+            return ds
+
         ds = self.dataset
 
         x = ds.x
         y = ds.y
 
         x, y = np.meshgrid(x, y)
-
         r_eq = self.r_eq
         r_pol = self.r_pol
         l_0 = self.lambda_0
@@ -185,6 +218,9 @@ class Image:
             (r_eq**2 / r_pol**2) * (s_z / np.sqrt((H - s_x) ** 2 + s_y**2))
         ) * (180 / np.pi)
         lon = (l_0 - np.arctan(s_y / (H - s_x))) * (180 / np.pi)
+
+        Image._lookup_table[key] = (lat, lon)
+        Image.save_lookup_table()
 
         ds = ds.assign_coords({"lat": (["y", "x"], lat), "lon": (["y", "x"], lon)})
         ds.lat.attrs["units"] = "degrees_north"

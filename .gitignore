@@ -44,6 +44,9 @@ docs/build/
 **/Data/
 **/*.json
 
+# Lookup table
+**/lookup_table.pkl
+
 # Dev
 sandbox/*
 src/_version.py
