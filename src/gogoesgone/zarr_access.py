@@ -39,7 +39,13 @@ def generate_url_list(globsearch_string):
         return flist
 
 
-def nearest_time_url(time, format="%Y%m%d %H:%M:%S", channel=13, product="ABI-L2-CMIPF", satellite="goes16"):
+def nearest_time_url(
+    time,
+    format="%Y%m%d %H:%M:%S",
+    channel=13,
+    product="ABI-L2-CMIPF",
+    satellite="goes16",
+):
     """Returns URL of file with nearest observation starting time to provided time
 
     Accuracy only to the nearest second
@@ -54,7 +60,9 @@ def nearest_time_url(time, format="%Y%m%d %H:%M:%S", channel=13, product="ABI-L2
 
     url_list_hours = [
         generate_url_list(
-            generate_globsearch_string(i.year, i.timetuple().tm_yday, i.hour, channel, product, satellite)
+            generate_globsearch_string(
+                i.year, i.timetuple().tm_yday, i.hour, channel, product, satellite
+            )
         )
         for i in [pre_dt_given, dt_given, post_dt_given]
     ]
