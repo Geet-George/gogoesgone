@@ -7,6 +7,52 @@ import fsspec
 import pickle
 
 
+def create_image(
+    f,
+    image_dir,
+    extent,
+    vars_to_save="CMI",
+):
+    """f is the URL to the file on AWS
+    image_dir is the directory to save the data tos
+    extent is the extent of the image to save: format is (lon_min,lon_max,lat_min,lat_max)
+    vars_to_save is a list of variables to save, if only one variable is to be saved, it should be a string
+    """
+
+    s3f = fsspec.open(f, mode="rb", anon=True, default_fill_cache=False)
+
+    yeardayofyear = f.split("/")[-1].split("_s")[1]
+    year = yeardayofyear[:4]
+    dayofyear = yeardayofyear[4:7]
+
+    save_dir = os.path.join(image_dir, year, dayofyear)
+    if not os.path.exists(save_dir):
+        try:
+            os.makedirs(save_dir)
+        except FileExistsError:
+            pass
+    image_save_path = os.path.join(
+        save_dir, f"{f.split('/')[-1].split('.')[0]}_{extent}_(lons,lats).zarr"
+    )
+
+    if os.path.exists(image_save_path):
+        print(f"Found image file: {image_save_path}! Skipping download...")
+        pass
+    else:
+        ds = xr.open_dataset(s3f.open(), engine="h5netcdf")[
+            ["CMI", "goes_imager_projection"]
+        ]
+        img = Image(ds)
+
+        try:
+            subset = img.subset_region_from_latlon_extents(extent, unit="degree")
+            subset.to_zarr(image_save_path)
+        except ValueError as ve:
+            print(
+                f"Encountered value error {ve} and therefore skipping this day, not saving file."
+            )
+
+
 class Image:
     """Class to read and process images"""
 
